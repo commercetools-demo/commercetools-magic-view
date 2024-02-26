@@ -8,7 +8,7 @@ export default defineMessages({
   },
   apiKey: {
     id: 'Magic.apiKey',
-    defaultMessage: 'API key',
+    defaultMessage: 'Openai API key',
   },
   save: {
     id: 'Magic.save',
