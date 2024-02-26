@@ -1,0 +1,12 @@
+query FetchProduct($id: String!, $locale: Locale) {
+  product(id: $id) {
+    id
+    version
+    masterData {
+      current {
+        name(locale: $locale)
+        description(locale: $locale)
+      }
+    }
+  }
+}
