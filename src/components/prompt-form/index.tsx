@@ -66,9 +66,13 @@ const PromptForm = ({ productId }: { productId: string }) => {
     <Spacings.Stack scale="xl">
       <CollapsiblePanel
         isClosed={isSuggestionArrived}
-        header={intl.formatMessage(messages.formEditorHeader, {
-          productName: product?.masterData?.current?.name,
-        })}
+        header={
+          intl
+            .formatMessage(messages.formEditorHeader, {
+              productName: product?.masterData?.current?.name,
+            })
+            .substring(0, 60) + '...'
+        }
         condensed
         horizontalConstraint="scale"
       >
