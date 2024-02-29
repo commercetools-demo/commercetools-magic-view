@@ -3,7 +3,7 @@ import { defineMessages } from 'react-intl';
 export default defineMessages({
   title: {
     id: 'Magic.title',
-    defaultMessage: 'Commercetools Magic',
+    defaultMessage: 'commercetools Magic',
   },
   noResults: {
     id: 'Magic.noResults',

@@ -2,7 +2,7 @@
  * @type {import('@commercetools-frontend/application-config').ConfigOptionsForCustomView}
  */
 const config = {
-  name: 'Commercetools Magic View',
+  name: 'commercetools Magic View',
   cloudIdentifier: '${env:CLOUD_IDENTIFIER}',
   env: {
     development: {
