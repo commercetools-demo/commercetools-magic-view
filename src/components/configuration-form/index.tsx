@@ -2,6 +2,7 @@ import MultilineTextField from '@commercetools-uikit/multiline-text-field';
 import { ContentNotification } from '@commercetools-uikit/notifications';
 import NumberField from '@commercetools-uikit/number-field';
 import PrimaryButton from '@commercetools-uikit/primary-button';
+import SelectField from '@commercetools-uikit/select-field';
 import Spacings from '@commercetools-uikit/spacings';
 import Text from '@commercetools-uikit/text';
 import { Form, Formik } from 'formik';
@@ -17,11 +18,20 @@ const ConfigurationForm = ( { productId }: { productId: string } ) => {
 
   const [isConfiguring, setisConfiguring] = useState(false);
 
-  const { setMaxTokens, setSeedText, getSeedText } =
+  const { setMaxTokens, setSeedText, getSeedText, getFields, setFields } =
     useConfiguration();
+  const fieldsOptions = [
+    { value: 'description', label: 'Description' },
+    { value: 'slug', label: 'Slug' },
+    { value: 'metaTitle', label: 'Meta Title' },
+    { value: 'metaDescription', label: 'Meta Description' },
+    { value: 'metaKeywords', label: 'Meta Keywords' },
+  ];
+
   const initialValues = {
     maxTokens: 100,
     seedText: getSeedText(),
+    fields: getFields(),
   };
 
   if (!isConfiguring) {
@@ -53,6 +63,7 @@ const ConfigurationForm = ( { productId }: { productId: string } ) => {
           onSubmit={(values) => {
             setMaxTokens(values.maxTokens);
             setSeedText(values.seedText);
+            setFields(values.fields);
             setisConfiguring(false);
           }}
           validate={(values) => {
@@ -62,6 +73,9 @@ const ConfigurationForm = ( { productId }: { productId: string } ) => {
             }
             if (!values.seedText) {
               errors.seedText = 'Required';
+            }
+            if (!values.fields || values.fields.length === 0) {
+              errors.fields = 'At least one field must be selected';
             }
             console.log({ errors });
             return errors;
@@ -102,6 +116,22 @@ const ConfigurationForm = ( { productId }: { productId: string } ) => {
                   {errors.seedText && touched.seedText && (
                     <Text.Caption tone="critical">
                       {errors.seedText}
+                    </Text.Caption>
+                  )}
+                </Spacings.Stack>
+                <Spacings.Stack scale="xs">
+                  <SelectField
+                    title={intl.formatMessage(messages.fields)}
+                    value={values.fields}
+                    options={fieldsOptions}
+                    name="fields"
+                    isMulti={true}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                  {errors.fields && touched.fields && (
+                    <Text.Caption tone="critical">
+                      {errors.fields}
                     </Text.Caption>
                   )}
                 </Spacings.Stack>

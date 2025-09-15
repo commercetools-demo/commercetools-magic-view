@@ -21,13 +21,18 @@ import {
   NOTIFICATION_KINDS_SIDE,
 } from '@commercetools-frontend/constants';
 import { useApplicationContext } from '@commercetools-frontend/application-shell-connectors';
+import { useConfiguration } from '../../hooks/configuration';
+import LoadingSpinner from '@commercetools-uikit/loading-spinner';
 
 const PromptForm = ({ productId }: { productId: string }) => {
   const initialValues = { seed: '', tone: '' };
   const intl = useIntl();
   const [isSuggestionArrived, setisSuggestionArrived] = useState(false);
-  const [suggestion, setSuggestion] = useState<Record<string, string>>({});
+  const [suggestion, setSuggestion] = useState<{
+    [key: string]: Record<string, string>;
+  }>({});
   const [isLoading, setisLoading] = useState(false);
+  const [isUpdating, setisUpdating] = useState(false);
 
   const { dataLocale } = useApplicationContext((context) => context);
 
@@ -35,47 +40,81 @@ const PromptForm = ({ productId }: { productId: string }) => {
 
   const { getLocalizedProductFieldSuggestion } = useGenAI();
 
+  const { getFields } = useConfiguration();
+
+  const fields = getFields();
+
   const handleSuggestion = async (values: { seed: string; tone: string }) => {
     if (product) {
       setisLoading(true);
-      const description = await getLocalizedProductFieldSuggestion(
-        product.masterData.current.name!,
-        'description',
-        values.seed,
-        values.tone
+      const results = await Promise.all(
+        fields.map((field: string) =>
+          getLocalizedProductFieldSuggestion(
+            product.masterData.current.name!,
+            field,
+            values.seed,
+            values.tone
+          )
+        )
       );
 
-      setSuggestion(description || {});
+      setSuggestion(
+        fields.reduce(
+          (acc: Record<string, Record<string, string>>, curr: string) => ({
+            ...acc,
+            [curr]:
+              fields.indexOf(curr) > -1 ? results[fields.indexOf(curr)] : {},
+          }),
+          {}
+        )
+      );
       setisLoading(false);
       setisSuggestionArrived(true);
     }
   };
 
   const handleUpdateProduct = async () => {
-    await updateProduct(suggestion);
-    showNotification({
-      kind: NOTIFICATION_KINDS_SIDE.success,
-      domain: DOMAINS.SIDE,
-      text: intl.formatMessage(messages.success),
-    });
-    setisSuggestionArrived(false);
-    setSuggestion({});
+    setisUpdating(true);
+    try {
+      const errors = [];
+      // convert to for await
+      for await (const field of fields) {
+        try {
+          await updateProduct(field, suggestion[field]);
+        } catch (error) {
+          console.log(error);
+          errors.push((error as any).body.message);
+        }
+      }
+
+      if (errors.length < fields.length) {
+        showNotification({
+          kind: NOTIFICATION_KINDS_SIDE.success,
+          domain: DOMAINS.SIDE,
+          text: intl.formatMessage(messages.success),
+        });
+      }
+      if (errors.length > 0) {
+        throw new Error(errors.join(', '));
+      }
+      setSuggestion({});
+      setisSuggestionArrived(false);
+    } catch (error) {
+      showNotification({
+        kind: NOTIFICATION_KINDS_SIDE.error,
+        domain: DOMAINS.SIDE,
+        text: (error as Error).message,
+      });
+      setSuggestion({});
+      setisSuggestionArrived(false);
+    } finally {
+      setisUpdating(false);
+    }
   };
 
   return (
-    <Spacings.Stack scale="xl">
-      <CollapsiblePanel
-        isClosed={isSuggestionArrived}
-        header={
-          intl
-            .formatMessage(messages.formEditorHeader, {
-              productName: product?.masterData?.current?.name,
-            })
-            .substring(0, 60) + '...'
-        }
-        condensed
-        horizontalConstraint="scale"
-      >
+    <>
+      {!isSuggestionArrived && (
         <Formik
           initialValues={initialValues}
           onSubmit={(values) => handleSuggestion(values)}
@@ -132,16 +171,45 @@ const PromptForm = ({ productId }: { productId: string }) => {
             </Form>
           )}
         </Formik>
-      </CollapsiblePanel>
+      )}
+      {isLoading && (
+        <Spacings.Stack scale="m" alignItems="center">
+          <Spacings.Inline
+            scale="xs"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Text.Body>Generating suggestions...</Text.Body>
+            <LoadingSpinner />
+          </Spacings.Inline>
+        </Spacings.Stack>
+      )}
       {isSuggestionArrived && (
         <Spacings.Stack scale="m">
-          <LocalizedMultilineTextField
-            title="desc"
-            value={suggestion}
-            selectedLanguage="en-US"
-            defaultExpandMultilineText
-            defaultExpandLanguages
-          ></LocalizedMultilineTextField>
+          {fields.map((field: string, index: number) => (
+            <CollapsiblePanel
+              key={field}
+              header={
+                intl
+                  .formatMessage(messages.formEditorHeader, {
+                    productName: product?.masterData?.current?.name,
+                    field: field,
+                  })
+                  .substring(0, 60) + '...'
+              }
+              condensed
+              isDefaultClosed={index !== 0}
+              horizontalConstraint="scale"
+            >
+              <LocalizedMultilineTextField
+                title={field}
+                value={suggestion[field] || {}}
+                selectedLanguage={dataLocale || 'en-US'}
+                defaultExpandMultilineText
+                defaultExpandLanguages
+              ></LocalizedMultilineTextField>
+            </CollapsiblePanel>
+          ))}
           <Spacings.Inline scale="xl">
             <SecondaryButton
               label={intl.formatMessage(messages.editSuggection)}
@@ -156,7 +224,7 @@ const PromptForm = ({ productId }: { productId: string }) => {
           </Spacings.Inline>
         </Spacings.Stack>
       )}
-    </Spacings.Stack>
+    </>
   );
 };
 

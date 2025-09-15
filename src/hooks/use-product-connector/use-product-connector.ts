@@ -2,12 +2,15 @@ import {
   useMcQuery,
   useMcMutation,
 } from '@commercetools-frontend/application-shell';
-import { GRAPHQL_TARGETS } from '@commercetools-frontend/constants';
+import { GRAPHQL_TARGETS, MC_API_PROXY_TARGETS } from '@commercetools-frontend/constants';
 import FetchProductQuery from './fetch-product.ctp.graphql';
-import UpdateProductQuery from './update-product.ctp.graphql';
 import { useMemo } from 'react';
 import { useApplicationContext } from '@commercetools-frontend/application-shell-connectors';
-
+import {
+  actions,
+  TSdkAction,
+  useAsyncDispatch,
+} from '@commercetools-frontend/sdk';
 interface Product {
   id: string;
   version: string;
@@ -19,8 +22,19 @@ interface Product {
   };
 }
 
+const mapfieldToAction: Record<string, string> = {
+  description: 'setDescription',
+  slug: 'changeSlug',
+  metaTitle: 'setMetaTitle',
+  metaDescription: 'setMetaDescription',
+  metaKeywords: 'setMetaKeywords',
+}
+
+
+
 export const useProduct = ({ productId }: { productId: string }) => {
-  const { dataLocale } = useApplicationContext((context) => context);
+  const { dataLocale, project } = useApplicationContext((context) => context);
+  const dispatchAppsRead = useAsyncDispatch<TSdkAction, any>();
 
   const {
     data,
@@ -36,10 +50,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
     },
   });
 
-  const [
-    execute,
-    { data: updateData, error: updateError, loading: updateLoading },
-  ] = useMcMutation<{ product: Product }>(UpdateProductQuery);
+  
 
   const product = useMemo(() => {
     if (!fetchLoading && !!data?.product) {
@@ -55,21 +66,28 @@ export const useProduct = ({ productId }: { productId: string }) => {
     return null;
   }, [product]);
 
-  const updateProduct = async (description: Record<string, string>) => {
-    return await execute({
-      variables: {
-        id: productId,
-        version,
-        description: Object.keys(description).map((locale) => ({
-          locale,
-          value: description[locale],
-        })),
-        locale: dataLocale,
-      },
-      context: {
-        target: GRAPHQL_TARGETS.COMMERCETOOLS_PLATFORM,
-      },
-    });
+  const updateProduct = async (field: string, suggestion: Record<string, string>) => {
+    const product = await dispatchAppsRead(
+      actions.get({
+        mcApiProxyTarget: MC_API_PROXY_TARGETS.COMMERCETOOLS_PLATFORM,
+        uri: `/${project?.key}/products/${productId}`,
+      })
+    );
+    return dispatchAppsRead(
+      actions.post({
+        mcApiProxyTarget: MC_API_PROXY_TARGETS.COMMERCETOOLS_PLATFORM,
+        uri: `/${project?.key}/products/${productId}`,
+        payload: {
+          version: product.version,
+          actions: [{
+            action: mapfieldToAction[field],
+            [field]: suggestion,
+            staged: false,
+          }],
+        },
+      })
+    );
+
   };
 
   return {
@@ -78,7 +96,5 @@ export const useProduct = ({ productId }: { productId: string }) => {
     error: fetchError,
     loading: fetchLoading,
     updateProduct,
-    updateError,
-    updateLoading,
   };
 };

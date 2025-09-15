@@ -26,4 +26,8 @@ export default defineMessages({
     id: 'Magic.seedText',
     defaultMessage: 'Seed text for AI prompts',
   },
+  fields: {
+    id: 'Magic.fields',
+    defaultMessage: 'Fields to generate suggestions for',
+  },
 });

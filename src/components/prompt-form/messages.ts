@@ -15,7 +15,7 @@ export default defineMessages({
   },
   formEditorHeader: {
     id: 'Magic.editorHeader',
-    defaultMessage: 'Create description for "{productName}"',
+    defaultMessage: 'Create {field} for "{productName}"',
   },
   acceptSuggestion: {
     id: 'Magic.acceptSuggestion',
@@ -28,5 +28,9 @@ export default defineMessages({
   success: {
     id: 'Magic.success',
     defaultMessage: 'Product updated successfully',
+  },
+  error: {
+    id: 'Magic.error',
+    defaultMessage: 'Error updating {field}',
   },
 });

@@ -8,6 +8,11 @@ import {
 import { useApplicationContext } from '@commercetools-frontend/application-shell-connectors';
 import { useTranslate } from '../google-translate/translation';
 
+// create a method to convert string to eligible url slug
+const convertToUrlSlug = (string: string) => {
+  return string.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+};
+
 export const useGenAI = () => {
   const { getMaxTokens, getSeedText } = useConfiguration();
   const maxTokens = getMaxTokens();
@@ -34,7 +39,7 @@ export const useGenAI = () => {
     const genAI = new GoogleGenAI({ apiKey: environment.genAIKey });
 
     try {
-      const prompt = `Give suggestion for the product ${field}. No other text or explanation.\n\nProduct name: ${productName}\nSeed words: ${seed}\nTone: ${tone}`;
+      const prompt = `Give suggestion for the product ${field}. No other text or explanation. Respond only with requested field. \n\nProduct name: ${productName}\nSeed words: ${seed}\nTone: ${tone}`;
 
       const response = await genAI.models.generateContent({
         model: 'gemini-2.0-flash-001',
@@ -47,7 +52,12 @@ export const useGenAI = () => {
         },
       });
 
-      return response.text || response;
+      const text = response.text;
+      if (!text) {
+        return;
+      }
+      // Remove all white spaces aand new lines at the beginning and the end
+      return text.replace(/^\s+|\s+$/g, '');
     } catch (error) {
       showNotification({
         kind: NOTIFICATION_KINDS_SIDE.error,
@@ -84,7 +94,11 @@ export const useGenAI = () => {
           );
 
           if (localizedProductField) {
+            if (field === 'slug') {
+              localizedString[lang] = convertToUrlSlug(localizedProductField[0].translatedText);
+            } else {
             localizedString[lang] = localizedProductField[0].translatedText;
+            }
           }
         }
       }
