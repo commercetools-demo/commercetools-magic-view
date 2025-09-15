@@ -11,7 +11,7 @@ export default defineMessages({
   },
   getDescription: {
     id: 'Magic.get',
-    defaultMessage: 'Magic',
+    defaultMessage: 'Generate',
   },
   formEditorHeader: {
     id: 'Magic.editorHeader',

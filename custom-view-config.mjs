@@ -16,7 +16,7 @@ const config = {
   headers: {
     csp: {
       'connect-src': [
-        'https://api.openai.com/v1/completions',
+        'https://generativelanguage.googleapis.com',
         'https://translation.googleapis.com/language/translate/v2',
       ],
     },
@@ -24,6 +24,7 @@ const config = {
   additionalEnv: {
     testURL: '${env:TEST_URL}',
     translateApiKey: '${env:TRANSLATE_API_KEY}',
+    genAIKey: '${env:GENAI_KEY}',
   },
   oAuthScopes: {
     view: ['view_products'],

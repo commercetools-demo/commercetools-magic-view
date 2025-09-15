@@ -4,11 +4,11 @@ export default defineMessages({
   noConfiguration: {
     id: 'Magic.noConfiguration',
     defaultMessage:
-      'View is not configured. Please use the form below to configure it.',
+      'Please use the form below to configure it.',
   },
-  apiKey: {
-    id: 'Magic.apiKey',
-    defaultMessage: 'Openai API key',
+  cancel: {
+    id: 'Magic.cancel',
+    defaultMessage: 'Cancel',
   },
   save: {
     id: 'Magic.save',
@@ -16,14 +16,14 @@ export default defineMessages({
   },
   reconfigure: {
     id: 'Magic.reconfigure',
-    defaultMessage: 'Reconfigure API',
-  },
-  hint: {
-    id: 'Magic.hint',
-    defaultMessage: 'Enter your API key.',
+    defaultMessage: 'Reconfigure',
   },
   maxTokens: {
     id: 'Magic.maxTokens',
     defaultMessage: 'Max token usage per request',
+  },
+  seedText: {
+    id: 'Magic.seedText',
+    defaultMessage: 'Seed text for AI prompts',
   },
 });

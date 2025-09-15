@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 import messages from './messages';
 import SelectField from '@commercetools-uikit/select-field';
 import Text from '@commercetools-uikit/text';
-import { useOpenAI } from '../../hooks/openai';
+import { useGenAI } from '../../hooks/genai';
 import { useProduct } from '../../hooks/use-product-connector';
 import PrimaryButton from '@commercetools-uikit/primary-button';
 import SecondaryButton from '@commercetools-uikit/secondary-button';
@@ -33,19 +33,19 @@ const PromptForm = ({ productId }: { productId: string }) => {
 
   const { loading, product, updateProduct } = useProduct({ productId });
 
-  const { getLocalizedProductDescriptionSuggestion } = useOpenAI();
+  const { getLocalizedProductFieldSuggestion } = useGenAI();
 
   const handleSuggestion = async (values: { seed: string; tone: string }) => {
     if (product) {
       setisLoading(true);
-      const description = await getLocalizedProductDescriptionSuggestion(
+      const description = await getLocalizedProductFieldSuggestion(
         product.masterData.current.name!,
+        'description',
         values.seed,
         values.tone
       );
-      console.log(description);
 
-      setSuggestion(description || '');
+      setSuggestion(description || {});
       setisLoading(false);
       setisSuggestionArrived(true);
     }

@@ -1,17 +1,13 @@
-import { useIntl } from 'react-intl';
 import {
-  TApplicationContext,
   useApplicationContext,
-  useCustomViewContext,
+  useCustomViewContext
 } from '@commercetools-frontend/application-shell-connectors';
 
+import { ContentNotification } from '@commercetools-uikit/notifications';
 import Spacings from '@commercetools-uikit/spacings';
 import Text from '@commercetools-uikit/text';
-import messages from './messages';
-import { useConfiguration } from '../../hooks/configuration';
 import ConfigurationForm from '../configuration-form';
-import PromptForm from '../prompt-form';
-import { ContentNotification } from '@commercetools-uikit/notifications';
+import messages from './messages';
 
 const Magic = () => {
   const { env, testURL } = useApplicationContext<{
