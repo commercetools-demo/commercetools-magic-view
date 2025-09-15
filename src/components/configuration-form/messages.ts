@@ -24,7 +24,7 @@ export default defineMessages({
   },
   seedText: {
     id: 'Magic.seedText',
-    defaultMessage: 'Seed text for AI prompts',
+    defaultMessage: 'System prompt',
   },
   fields: {
     id: 'Magic.fields',

@@ -12,8 +12,9 @@ import messages from './messages';
 import { useState } from 'react';
 import SecondaryButton from '@commercetools-uikit/secondary-button';
 import PromptForm from '../prompt-form';
+import Constraints from '@commercetools-uikit/constraints';
 
-const ConfigurationForm = ( { productId }: { productId: string } ) => {
+const ConfigurationForm = ({ productId }: { productId: string }) => {
   const intl = useIntl();
 
   const [isConfiguring, setisConfiguring] = useState(false);
@@ -51,47 +52,44 @@ const ConfigurationForm = ( { productId }: { productId: string } ) => {
       </Spacings.Stack>
     );
   }
-  
+
   return (
     <Spacings.Inline scale="xl" justifyContent="flex-start">
-      <Spacings.Stack scale="xl">
-        <ContentNotification type="info">
-          <Text.Body intlMessage={messages.noConfiguration} />
-        </ContentNotification>
-        <Formik
-          initialValues={initialValues}
-          onSubmit={(values) => {
-            setMaxTokens(values.maxTokens);
-            setSeedText(values.seedText);
-            setFields(values.fields);
-            setisConfiguring(false);
-          }}
-          validate={(values) => {
-            const errors = {} as any;
-            if (!values.maxTokens) {
-              errors.maxTokens = 'Required';
-            }
-            if (!values.seedText) {
-              errors.seedText = 'Required';
-            }
-            if (!values.fields || values.fields.length === 0) {
-              errors.fields = 'At least one field must be selected';
-            }
-            console.log({ errors });
-            return errors;
-          }}
-        >
-          {({
-            values,
-            isValid,
-            errors,
-            touched,
-            dirty,
-            handleChange,
-            handleBlur,
-          }) => (
-            <Form>
-              <Spacings.Stack scale="l">
+      <Formik
+        initialValues={initialValues}
+        onSubmit={(values) => {
+          setMaxTokens(values.maxTokens);
+          setSeedText(values.seedText);
+          setFields(values.fields);
+          setisConfiguring(false);
+        }}
+        validate={(values) => {
+          const errors = {} as any;
+          if (!values.maxTokens) {
+            errors.maxTokens = 'Required';
+          }
+          if (!values.seedText) {
+            errors.seedText = 'Required';
+          }
+          if (!values.fields || values.fields.length === 0) {
+            errors.fields = 'At least one field must be selected';
+          }
+          console.log({ errors });
+          return errors;
+        }}
+      >
+        {({
+          values,
+          isValid,
+          errors,
+          touched,
+          dirty,
+          handleChange,
+          handleBlur,
+        }) => (
+          <Form style={{ width: '100%' }}>
+            <Spacings.Stack scale="m">
+              <Constraints.Horizontal>
                 <Spacings.Stack scale="xs">
                   <NumberField
                     title={intl.formatMessage(messages.maxTokens)}
@@ -110,6 +108,7 @@ const ConfigurationForm = ( { productId }: { productId: string } ) => {
                     title={intl.formatMessage(messages.seedText)}
                     value={values.seedText}
                     name="seedText"
+                    defaultExpandMultilineText
                     onChange={handleChange}
                     onBlur={handleBlur}
                   />
@@ -130,29 +129,27 @@ const ConfigurationForm = ( { productId }: { productId: string } ) => {
                     onBlur={handleBlur}
                   />
                   {errors.fields && touched.fields && (
-                    <Text.Caption tone="critical">
-                      {errors.fields}
-                    </Text.Caption>
+                    <Text.Caption tone="critical">{errors.fields}</Text.Caption>
                   )}
                 </Spacings.Stack>
-                <Spacings.Inline scale="xl" justifyContent="space-between">
-                  <SecondaryButton
-                    label={intl.formatMessage(messages.cancel)}
-                    onClick={() => {
-                      setisConfiguring(false);
-                    }}
-                  ></SecondaryButton>
-                  <PrimaryButton
-                    isDisabled={!isValid || !dirty}
-                    label={intl.formatMessage(messages.save)}
-                    type="submit"
-                  ></PrimaryButton>
-                </Spacings.Inline>
-              </Spacings.Stack>
-            </Form>
-          )}
-        </Formik>
-      </Spacings.Stack>
+              </Constraints.Horizontal>
+              <Spacings.Inline scale="xl" justifyContent="space-between">
+                <SecondaryButton
+                  label={intl.formatMessage(messages.cancel)}
+                  onClick={() => {
+                    setisConfiguring(false);
+                  }}
+                ></SecondaryButton>
+                <PrimaryButton
+                  isDisabled={!isValid || !dirty}
+                  label={intl.formatMessage(messages.save)}
+                  type="submit"
+                ></PrimaryButton>
+              </Spacings.Inline>
+            </Spacings.Stack>
+          </Form>
+        )}
+      </Formik>
     </Spacings.Inline>
   );
 };
