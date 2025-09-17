@@ -19,15 +19,9 @@ const ConfigurationForm = ({ productId }: { productId: string }) => {
 
   const [isConfiguring, setisConfiguring] = useState(false);
 
-  const { setMaxTokens, setSeedText, getSeedText, getFields, setFields } =
+  const { setMaxTokens, setSeedText, getSeedText, getFields, setFields, getFieldOptions } =
     useConfiguration();
-  const fieldsOptions = [
-    { value: 'description', label: 'Description' },
-    { value: 'slug', label: 'Slug' },
-    { value: 'metaTitle', label: 'Meta Title' },
-    { value: 'metaDescription', label: 'Meta Description' },
-    { value: 'metaKeywords', label: 'Meta Keywords' },
-  ];
+
 
   const initialValues = {
     maxTokens: 100,
@@ -122,7 +116,7 @@ const ConfigurationForm = ({ productId }: { productId: string }) => {
                   <SelectField
                     title={intl.formatMessage(messages.fields)}
                     value={values.fields}
-                    options={fieldsOptions}
+                    options={getFieldOptions()}
                     name="fields"
                     isMulti={true}
                     onChange={handleChange}

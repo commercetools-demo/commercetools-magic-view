@@ -40,7 +40,7 @@ const PromptForm = ({ productId }: { productId: string }) => {
 
   const { getLocalizedProductFieldSuggestion } = useGenAI();
 
-  const { getFields } = useConfiguration();
+  const { getFields, getFieldLabel } = useConfiguration();
 
   const fields = getFields();
 
@@ -77,8 +77,8 @@ const PromptForm = ({ productId }: { productId: string }) => {
     setisUpdating(true);
     try {
       const errors = [];
-      // convert to for await
-      for await (const field of fields) {
+      const nonAeoFields = fields.filter((field: string) => field !== 'aeoKeywords');
+      for await (const field of nonAeoFields) {
         try {
           await updateProduct(field, suggestion[field]);
         } catch (error) {
@@ -87,7 +87,7 @@ const PromptForm = ({ productId }: { productId: string }) => {
         }
       }
 
-      if (errors.length < fields.length) {
+      if (errors.length < nonAeoFields.length) {
         showNotification({
           kind: NOTIFICATION_KINDS_SIDE.success,
           domain: DOMAINS.SIDE,
@@ -193,7 +193,7 @@ const PromptForm = ({ productId }: { productId: string }) => {
                 intl
                   .formatMessage(messages.formEditorHeader, {
                     productName: product?.masterData?.current?.name,
-                    field: field,
+                    field: getFieldLabel(field),
                   })
                   .substring(0, 60) + '...'
               }
@@ -202,7 +202,7 @@ const PromptForm = ({ productId }: { productId: string }) => {
               horizontalConstraint="scale"
             >
               <LocalizedMultilineTextField
-                title={field}
+                title={getFieldLabel(field)}
                 value={suggestion[field] || {}}
                 selectedLanguage={dataLocale || 'en-US'}
                 defaultExpandMultilineText

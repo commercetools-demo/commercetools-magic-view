@@ -15,7 +15,22 @@ export const useConfiguration = () => {
 
   const getFields = () => {
     const fields = localStorage.getItem(fieldsKey);
-    return fields ? JSON.parse(fields) : ['description', 'slug', 'metaTitle', 'metaDescription', 'metaKeywords'];
+    return fields ? JSON.parse(fields) : ['description', 'slug', 'aeoKeywords', 'metaTitle', 'metaDescription', 'metaKeywords'];
+  };
+
+  const getFieldOptions = () => {
+    return [
+      { value: 'description', label: 'Description' },
+      { value: 'slug', label: 'Slug' },
+      { value: 'metaTitle', label: 'Meta Title' },
+      { value: 'metaDescription', label: 'Meta Description' },
+      { value: 'metaKeywords', label: 'Meta Keywords' },
+      { value: 'aeoKeywords', label: 'AEO Keywords' },
+    ];
+  };
+
+  const getFieldLabel = (field: string) => {
+    return getFieldOptions().find((option) => option.value === field)?.label;
   };
 
   const setMaxTokens = (maxTokens: number) => {
@@ -37,5 +52,7 @@ export const useConfiguration = () => {
     setSeedText,
     getFields,
     setFields,
+    getFieldOptions,
+    getFieldLabel,
   };
 };
